@@ -57,7 +57,7 @@ pub fn run() {
       std::fs::create_dir_all(&dir)?;
 
       // open connection
-      let conn = db::open_encrypted(&dir.join("app.db"))?;
+      let conn = db::open(&dir.join("app.db"))?;
       db::init(&conn)?;
 
       app.manage(Db(Mutex::new(conn)));
