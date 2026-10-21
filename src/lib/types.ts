@@ -3,4 +3,10 @@ export interface Item {
   name: string;
 }
 
-export type Kind = "project" | "task";
+export type Kind = "project" | "task" | "response" | "flag";
+
+export interface Response {
+    id: number;
+    responseLabel: string;
+    responseText: string;
+}

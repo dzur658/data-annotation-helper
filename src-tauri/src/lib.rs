@@ -254,7 +254,7 @@ fn list_items(
             let task_id = kind.parent_id(parent_id)?;
             query_all(
                 &conn,
-                "SELECT responseId, taskId, responseLabel, responseData FROM responses WHERE taskId = ?1 ORDER BY responseId",
+                "SELECT responseId, taskId, responseLabel, responseText FROM responses WHERE taskId = ?1 ORDER BY responseId",
                 [&task_id],
                 |row| {
                     Ok(Item::Response(Response {
