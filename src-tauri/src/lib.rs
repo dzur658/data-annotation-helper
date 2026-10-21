@@ -37,8 +37,10 @@ pub struct Task {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NewTask {
-    project_id: i64,
+    // id is associated project id when creating a new task
+    parent_id: i64,
     name: String,
 }
 
@@ -154,7 +156,7 @@ fn add_item(state: tauri::State<Db>, item: NewItem) -> Result<i64, String> {
                 .map_err(|e| e.to_string())
         }
         NewItem::Task(task) => {
-            conn.execute("INSERT INTO tasks (projectId, taskName) VALUES (?1, ?2)", params![task.project_id, task.name])
+            conn.execute("INSERT INTO tasks (projectId, taskName) VALUES (?1, ?2)", params![task.parent_id, task.name])
                 .map(|_| conn.last_insert_rowid())
                 .map_err(|e| e.to_string())
         }
