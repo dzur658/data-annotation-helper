@@ -16,7 +16,7 @@ export default function ProjectsPage() {
       items={items}
       onCreate={create}
       onDelete={remove}
-      onSelect={(id) => router.push(`/projects/${id}/tasks`)}
+      onSelect={(id) => router.push(`/projects/tasks?projectId=${id}`)}
     />
   );
 }
