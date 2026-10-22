@@ -4,3 +4,8 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+
+html {
+  background-color: #171717;   /* neutral-900 */
+  color-scheme: dark;          /* also makes scrollbars, form controls dark */
+}

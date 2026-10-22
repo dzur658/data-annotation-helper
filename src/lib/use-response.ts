@@ -4,13 +4,18 @@ import { invoke } from "@tauri-apps/api/core";
 
 import type { Response, Kind } from "./types";
 
+export interface ResponsePair {
+  a: Response;
+  b: Response;
+}
+
 export function useResponse(parentId: number, responseLabel?: string, responseText?: string) {
-  const [responses, setResponses] = useState<Response[] | null>(null);
+  const [responses, setResponses] = useState<ResponsePair | null>(null);
 
   const kind: Kind = "response";
 
   const refresh = () => {
-    invoke<Response[]>("list_items", { kind, parentId })
+    invoke<ResponsePair>("list_items", { kind, parentId })
       .then(setResponses)
       .catch((e) => console.error(`❌ get_response(${parentId}) failed:`, e));
   }

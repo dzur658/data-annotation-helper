@@ -3,25 +3,43 @@
 
 import { useRouter, usePathname } from "next/navigation";
 
+const KEEP_FOR_PARENT: Record<string, string[]> = {
+    tasks: [],
+    responses: ["projectId"],
+}
+
 export default function BackButton() {
   const router = useRouter();
   const pathname = usePathname();
 
   const segments = pathname.split("/").filter(Boolean);
-
-  // return place holder div if at the root page
-  if (segments.length <= 1) return (
-    <div className="mr-3 rounded-md p-1.5 text-gray-400 transition hover:bg-gray-800 hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-600"></div>
-  );
+  if (segments.length <= 1) {
+    return <div className="mr-3 w-8" />;
+  }
 
   const parentSegments = [...segments];
-  parentSegments.pop();                          // drop the kind segment ("tasks")
+  parentSegments.pop();
+  if (Number(parentSegments.at(-1))) parentSegments.pop();  // harmless if paths are static-only
 
   const parentPath = "/" + parentSegments.join("/");
 
+  const handleClick = () => {
+    const current = new URLSearchParams(window.location.search);
+    const kept = new URLSearchParams();
+
+    for (const name of KEEP_FOR_PARENT[segments.at(-1)!] ?? []) {
+      const value = current.get(name);
+      if (value !== null) kept.set(name, value);
+    }
+
+    const qs = kept.toString();
+
+    router.push(qs ? `${parentPath}?${qs}` : parentPath);
+  };
+
   return (
     <button
-      onClick={() => router.push(parentPath)}
+      onClick={handleClick}
       aria-label="Go back"
       className="mr-3 rounded-md p-1.5 text-gray-400 transition hover:bg-gray-800 hover: cursor-pointer hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-600"
     >
