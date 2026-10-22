@@ -1,8 +1,14 @@
 import { useState } from "react";
 
+import { invoke } from "@tauri-apps/api/core";
+
+import { useRouter } from "next/navigation";
+
 import BackButton from "../../../../_components/back_button";
 import NewButton from "../../../../_components/button";
 import ResponsePanel from "./response_panel";
+
+import type { NewResponsePair, NewResponse } from "../../../../../lib/types";
 
 export interface ResponseEditorProps {
   taskId: number;
@@ -12,29 +18,50 @@ export interface ResponseEditorProps {
 }
 
 export default function ResponseEditor({ taskId, onCompleted }: ResponseEditorProps) {
-  const [responseA, setResponseA] = useState("");
-  const [responseB, setResponseB] = useState("");
+  const router = useRouter();
+
+  const [responseAText, setResponseAText] = useState<string>("");
+  const [responseBText, setResponseBText] = useState<string>("");
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ensure both responses are non-empty before allowing submission
-  const canSubmit = Boolean(responseA.trim()) && Boolean(responseB.trim()) && !checking;
+  const canSubmit = Boolean(responseAText.trim()) && Boolean(responseBText.trim()) && !checking;
 
   const handleCheck = async () => {
-    // setChecking(true);
-    // try {
-    //   // One command that saves the pair AND runs the citation analysis —
-    //   // see note below on why not two invokes
-    //   await invoke("check_citations", {
-    //     taskId,
-    //     responseA: labelA,
-    //     responseB: labelB,
-    //   });
-    //   router.refresh(); // or a local refetch — flips the branch to FlagWorkspace
-    // } finally {
-    //   setChecking(false);
-    // }
-    console.log('In progress...');
+    setChecking(true);
+
+    try {
+      const newResponseA: NewResponse = {
+        responseLabel: "A",
+        responseText: responseAText,
+      }
+
+      const newResponseB: NewResponse = {
+        responseLabel: "B",
+        responseText: responseBText,
+      }
+
+      const responsePair: NewResponsePair = {
+        taskId: taskId,
+        responseA: newResponseA,
+        responseB: newResponseB,
+      }
+
+      const payload = { "pair": responsePair };
+
+      console.log("Submitting response pair:", responsePair);
+
+      // One command that saves the pair AND runs the citation analysis —
+      // see note below on why not two invokes
+      await invoke("add_response_pair", {
+        ...payload,
+      });
+      router.refresh(); // or a local refetch — flips the branch to FlagWorkspace
+    } finally {
+      setChecking(false);
+    }
+    console.log('Fired.');
   };
 
     return (
@@ -48,15 +75,15 @@ export default function ResponseEditor({ taskId, onCompleted }: ResponseEditorPr
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <ResponsePanel
             label="Response A"
-            value={responseA}
-            onChange={setResponseA}
+            value={responseAText}
+            onChange={setResponseAText}
             disabled={checking}
             autoFocus
           />
           <ResponsePanel
             label="Response B"
-            value={responseB}
-            onChange={setResponseB}
+            value={responseBText}
+            onChange={setResponseBText}
             disabled={checking}
           />
         </div>

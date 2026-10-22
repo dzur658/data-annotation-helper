@@ -10,3 +10,14 @@ export interface Response {
     responseLabel: string;
     responseText: string;
 }
+
+export interface NewResponse {
+    responseLabel: string;
+    responseText: string;
+}
+
+export interface NewResponsePair {
+    taskId: number;
+    responseA: NewResponse;
+    responseB: NewResponse;
+}

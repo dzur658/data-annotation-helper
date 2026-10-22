@@ -3,6 +3,7 @@ mod db;
 use rusqlite::{Connection, params, Row};
 use serde::Deserialize;
 use serde::Serialize;
+use tauri::http::response;
 use std::sync::Mutex;
 use tauri::Manager;
 
@@ -62,10 +63,18 @@ pub struct Response {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NewResponse {
-    task_id: i64,
     response_label: String,
-    response_data: String,
+    response_text: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewResponsePair {
+    task_id: i64,
+    response_a: NewResponse,
+    response_b: NewResponse,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -117,7 +126,6 @@ enum Item {
 enum NewItem {
     Project(NewProject),
     Task(NewTask),
-    Response(NewResponse),
     Flag(NewFlag),
 }
 
@@ -160,17 +168,38 @@ fn add_item(state: tauri::State<Db>, item: NewItem) -> Result<i64, String> {
                 .map(|_| conn.last_insert_rowid())
                 .map_err(|e| e.to_string())
         }
-        NewItem::Response(response) => {
-            conn.execute("INSERT INTO responses (taskId, responseLabel, responseData) VALUES (?1, ?2, ?3)", params![response.task_id, response.response_label, response.response_data])
-                .map(|_| conn.last_insert_rowid())
-                .map_err(|e| e.to_string())
-        }
         NewItem::Flag(flag) => {
             conn.execute("INSERT INTO flags (responseId, sentenceData, flagType, flagResolution, reasoningNote) VALUES (?1, ?2, ?3, ?4, ?5)", params![flag.response_id, flag.sentence_data, flag.flag_type, flag.flag_resolution, flag.reasoning_note])
                 .map(|_| conn.last_insert_rowid())
                 .map_err(|e| e.to_string())
         }
     }
+}
+
+#[tauri::command]
+fn add_response_pair(state: tauri::State<Db>, pair: NewResponsePair) -> Result<(i64, i64), String> {
+    let conn = state.0.lock().unwrap();
+
+    let associated_task_id = pair.task_id;
+
+    let response_a = &pair.response_a;
+    let response_b = &pair.response_b;
+
+    let response_a_id = conn.execute(
+        "INSERT INTO responses (taskId, responseLabel, responseText) VALUES (?1, ?2, ?3)",
+        params![associated_task_id, "A", response_a.response_text],
+    )
+    .map(|_| conn.last_insert_rowid())
+    .map_err(|e| e.to_string())?;
+
+    let response_b_id = conn.execute(
+        "INSERT INTO responses (taskId, responseLabel, responseText) VALUES (?1, ?2, ?3)",
+        params![associated_task_id, "B", response_b.response_text],
+    )
+    .map(|_| conn.last_insert_rowid())
+    .map_err(|e| e.to_string())?;
+
+    Ok((response_a_id, response_b_id))
 }
 
 #[tauri::command]
@@ -330,7 +359,7 @@ pub fn run() {
       app.manage(Db(Mutex::new(conn)));
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![add_item, delete_item, list_items])
+    .invoke_handler(tauri::generate_handler![add_item, add_response_pair, delete_item, list_items])
     .run(tauri::generate_context!())
     .expect("error while building tauri application");
 }
