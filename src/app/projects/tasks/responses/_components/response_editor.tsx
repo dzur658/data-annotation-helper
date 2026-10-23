@@ -2,8 +2,6 @@ import { useState } from "react";
 
 import { invoke } from "@tauri-apps/api/core";
 
-import { useRouter } from "next/navigation";
-
 import BackButton from "../../../../_components/back_button";
 import NewButton from "../../../../_components/button";
 import ResponsePanel from "./response_panel";
@@ -18,8 +16,6 @@ export interface ResponseEditorProps {
 }
 
 export default function ResponseEditor({ taskId, onCompleted }: ResponseEditorProps) {
-  const router = useRouter();
-
   const [responseAText, setResponseAText] = useState<string>("");
   const [responseBText, setResponseBText] = useState<string>("");
   const [checking, setChecking] = useState(false);
@@ -52,16 +48,14 @@ export default function ResponseEditor({ taskId, onCompleted }: ResponseEditorPr
 
       console.log("Submitting response pair:", responsePair);
 
-      // One command that saves the pair AND runs the citation analysis —
-      // see note below on why not two invokes
-      await invoke("add_response_pair", {
+      await invoke("add_response_pair_and_generate", {
         ...payload,
       });
-      router.refresh(); // or a local refetch — flips the branch to FlagWorkspace
     } finally {
       setChecking(false);
+
+      onCompleted();
     }
-    console.log('Fired.');
   };
 
     return (

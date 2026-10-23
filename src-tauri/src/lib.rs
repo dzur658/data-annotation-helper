@@ -4,6 +4,7 @@ use rusqlite::{Connection, params, Row};
 use serde::Deserialize;
 use serde::Serialize;
 use std::sync::Mutex;
+use std::task;
 use tauri::{Manager, State};
 use anyhow::Result;
 
@@ -250,8 +251,7 @@ fn generate_flags(model: &AppState, response: Response) -> Result<Vec<NewFlag>, 
     Ok(flags)
 }
 
-#[tauri::command]
-fn add_response_pair(state: tauri::State<Db>, model: tauri::State<AppState>, pair: NewResponsePair) -> Result<(i64, i64), String> {
+fn add_response_pair(state: tauri::State<Db>, pair: NewResponsePair) -> Result<(i64, i64), String> {
     let conn = state.0.lock().unwrap();
 
     let associated_task_id = pair.task_id;
@@ -259,8 +259,6 @@ fn add_response_pair(state: tauri::State<Db>, model: tauri::State<AppState>, pai
     let response_a = &pair.response_a;
     let response_b = &pair.response_b;
 
-
-    // insert responses first so we can get their response ids to generate flags for them
     let response_a_id = conn.execute(
         "INSERT INTO responses (taskId, responseLabel, responseText) VALUES (?1, ?2, ?3)",
         params![associated_task_id, "A", response_a.response_text],
@@ -275,25 +273,57 @@ fn add_response_pair(state: tauri::State<Db>, model: tauri::State<AppState>, pai
     .map(|_| conn.last_insert_rowid())
     .map_err(|e| e.to_string())?;
 
+    Ok((response_a_id, response_b_id))
+}
+
+fn add_generated_flags(state: tauri::State<Db>, response_a_flags: Vec<NewFlag>, response_b_flags: Vec<NewFlag>) -> Result<(), String> {
+    let conn = state.0.lock().unwrap();
+    
+    for flag in response_a_flags {
+        conn.execute("INSERT INTO flags (responseId, sentenceText, flagType, flagResolution, reasoningNote) VALUES (?1, ?2, ?3, ?4, ?5)", params![flag.response_id, flag.sentence_text, flag.flag_type, flag.flag_resolution, flag.reasoning_note])
+            .map(|_| ())
+            .map_err(|e| e.to_string())?;
+    }
+
+    for flag in response_b_flags {
+        conn.execute("INSERT INTO flags (responseId, sentenceText, flagType, flagResolution, reasoningNote) VALUES (?1, ?2, ?3, ?4, ?5)", params![flag.response_id, flag.sentence_text, flag.flag_type, flag.flag_resolution, flag.reasoning_note])
+            .map(|_| ())
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn add_response_pair_and_generate(state: tauri::State<'_, Db>, model: tauri::State<'_, AppState>, pair: NewResponsePair) -> Result<(i64, i64), String> {
+    let task_id = pair.task_id;
+
+    let response_a_text = pair.response_a.response_text.clone();
+    let response_b_text = pair.response_b.response_text.clone();
+    
+    let (response_a_id, response_b_id) = add_response_pair(state.clone(), pair)?;
+
     // generate flags for response A
     let response_a_wrapped = Response {
         id: response_a_id,
-        task_id: associated_task_id,
+        task_id: task_id,
         response_label: "A".to_string(),
-        response_text: response_a.response_text.clone(),
+        response_text: response_a_text,
     };
     let response_a_flags = generate_flags(&model, response_a_wrapped)?;
 
     let response_b_wrapped = Response {
         id: response_b_id,
-        task_id: associated_task_id,
+        task_id: task_id,
         response_label: "B".to_string(),
-        response_text: response_b.response_text.clone(),
+        response_text: response_b_text,
     };
     let response_b_flags = generate_flags(&model, response_b_wrapped)?;
 
     println!("Generated {} flags for response A", response_a_flags.len());
     println!("Generated {} flags for response B", response_b_flags.len());
+
+    add_generated_flags(state.clone(), response_a_flags, response_b_flags)?;
 
     Ok((response_a_id, response_b_id))
 }
@@ -436,7 +466,7 @@ pub fn run() {
       });
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![ensure_model, add_item, add_response_pair, delete_item, list_items])
+    .invoke_handler(tauri::generate_handler![ensure_model, add_item, add_response_pair_and_generate, delete_item, list_items])
     .run(tauri::generate_context!())
     .expect("error while building tauri application");
 }

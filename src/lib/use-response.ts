@@ -37,5 +37,5 @@ export function useResponse(parentId: number, responseLabel?: string, responseTe
       .then(() => refresh())
       .catch((e) => console.error(`❌ delete_response(${parentId}) failed:`, e));
 
-  return { responses, create, remove };
+  return { responses, refresh, create, remove };
 }

@@ -13,7 +13,7 @@ export default function TasksPage() {
 
   const taskId = Number(useSearchParams().get("taskId"));
 
-  const { responses, create, remove } = useResponse(taskId);
+  const { responses, refresh, create, remove } = useResponse(taskId);
 
   if (responses === null) {
     // blank page for renders while fetching db
@@ -25,7 +25,7 @@ export default function TasksPage() {
     return (
       <Suspense>
         {/* <ResponseEditor taskId={Number(taskId)} /> */}
-        <ResponseEditor taskId={Number(taskId)} onCompleted={router.refresh} />
+        <ResponseEditor taskId={Number(taskId)} onCompleted={refresh} />
       </Suspense>
     );
   }
