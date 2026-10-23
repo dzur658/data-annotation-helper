@@ -4,7 +4,6 @@ use rusqlite::{Connection, params, Row};
 use serde::Deserialize;
 use serde::Serialize;
 use std::sync::Mutex;
-use std::task;
 use tauri::{Manager, State};
 use anyhow::Result;
 
@@ -34,6 +33,7 @@ pub struct DeleteProject {
 // start task data structures
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Task {
     id: i64,
     project_id: i64,
@@ -58,6 +58,7 @@ pub struct DeleteTask {
 // start response data structures
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Response {
     id: i64,
     task_id: i64,
@@ -90,6 +91,7 @@ pub struct DeleteResponse {
 // start flag data structures
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Flag {
     id: i64,
     response_id: i64,
@@ -100,6 +102,7 @@ pub struct Flag {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NewFlag {
     response_id: i64,
     sentence_text: String,

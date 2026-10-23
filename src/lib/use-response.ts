@@ -2,12 +2,7 @@ import { useState, useEffect } from "react";
 
 import { invoke } from "@tauri-apps/api/core";
 
-import type { Response, Kind } from "./types";
-
-export interface ResponsePair {
-  a: Response;
-  b: Response;
-}
+import type { ResponsePair, Response, Kind } from "./types";
 
 export function useResponse(parentId: number, responseLabel?: string, responseText?: string) {
   const [responses, setResponses] = useState<ResponsePair | null>(null);
@@ -15,8 +10,13 @@ export function useResponse(parentId: number, responseLabel?: string, responseTe
   const kind: Kind = "response";
 
   const refresh = () => {
-    invoke<ResponsePair>("list_items", { kind, parentId })
-      .then(setResponses)
+    invoke<Response[]>("list_items", { kind, parentId })
+      .then((rows) => {
+        const find = (label: string) =>
+        rows.find((r) => r.responseLabel === label) ?? null;
+        console.log(`Fetched responses for parentId ${parentId}:`, rows);
+        setResponses({ a: find("A"), b: find("B") });
+      })
       .catch((e) => console.error(`❌ get_response(${parentId}) failed:`, e));
   }
 

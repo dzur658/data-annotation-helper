@@ -2,25 +2,26 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import EntityPage from "../../../_components/entity-page";
 import { useResponse } from "../../../../lib/use-response";
 import { Suspense } from "react";
 
 import ResponseEditor from "./_components/response_editor";
+
+import FlagWorkspace from "./_components/flag_workspace";
 
 export default function TasksPage() {
   const router = useRouter();
 
   const taskId = Number(useSearchParams().get("taskId"));
 
-  const { responses, refresh, create, remove } = useResponse(taskId);
+  const { responses, refresh } = useResponse(taskId);
 
   if (responses === null) {
     // blank page for renders while fetching db
     return (
       <div className="min-h-screen bg-neutral-900"></div>
     );
-  } else if (responses?.length === 0) {
+  } else if (!responses.a || !responses.b) {
     // go to response creation page if no responses exist yet
     return (
       <Suspense>
@@ -32,7 +33,7 @@ export default function TasksPage() {
 
   return (
     <Suspense>
-      <p>TO FLAG WORKSPACE</p>
+      <FlagWorkspace taskId={taskId} responses={responses} />
     </Suspense>
   );
 }
