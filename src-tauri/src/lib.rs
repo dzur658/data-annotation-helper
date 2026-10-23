@@ -228,7 +228,7 @@ fn generate_flags(model: &AppState, response: Response) -> Result<Vec<NewFlag>, 
     let question_prompt = "Does the sentence require a data annotator to find a proper citation?";
 
     // hardcode prob threshold for now (maybe user adjustable via gui in the future?)
-    let prob_threshold = 0.5;
+    let prob_threshold = 0.3;
 
     for sentence in sentences {
         let sentence_text = sentence.trim();
