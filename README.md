@@ -14,8 +14,7 @@ Projects → Tasks → Responses (A/B pairs) → Flags
 
 - **Projects** and **Tasks** allow you to organize analysis across multiple projects and tasks
 - Each **Task** gets one A/B response pair, pasted in and analyzed via "Check for Citations."
-- **Flags** mark specific sentences within a response (citations,
-  contradictions, etc.), each with a resolution status and reasoning note.
+- **Flags** mark specific sentences within a response (either auto generated, or human generated), each with a resolution status and reasoning note.
 - The **flag workspace** shows the response text with flagged sentences
   highlighted — click a flag card to focus its sentence.
 
@@ -25,13 +24,13 @@ Projects → Tasks → Responses (A/B pairs) → Flags
 | ---------- | ------------------------------------------- |
 | Shell      | Tauri v2 (Rust)                             |
 | Frontend   | Next.js 15 (App Router, static export) + Tailwind |
-| Database   | SQLite, accessed exclusively through Rust commands |
+| Database   | SQLite, accessed exclusively via Rust backend |
 | State      | React hooks + `invoke` — no client state library |
 
 ## Getting started
 
-Prerequisites: **Node 22 LTS**, **pnpm**, **Rust** (with the Tauri v2
-prerequisites for your platform).
+Prerequisites: **Node 22 LTS**, **pnpm**, **Rust** (with the [Tauri v2
+prerequisites](https://tauri.app/start/prerequisites/) for your platform).
 
 ```bash
 pnpm install
@@ -44,7 +43,6 @@ pnpm tauri dev      # dev mode — hot reload on both sides
 ## Building
 
 ```bash
-pnpm build          # static-exports the frontend to out/
 pnpm tauri build    # packages everything → target/release/
 ```
 
@@ -55,7 +53,7 @@ commands (`invoke`), dispatched by a `kind` parameter:
 
 - `list_items` / `add_item` / `delete_item` — CRUD for every entity,
   keyed by `kind: "project" | "task" | "response" | "flag"`
-- `check_citations` — saves a task's A/B response pair and generates its
+- `add_response_pair_and_generate` — saves a task's A/B response pair and generates its
   flags in one atomic transaction
 
 **URL scheme:** query params carry runtime ids (required for static export,
@@ -72,18 +70,6 @@ which can't prerender unknown dynamic routes):
 props and report events up via callbacks. The URL is the source of truth for
 navigation state.
 
-## Project structure
-
-```
-src/
-├── app/                    # Next.js App Router (routes + colocated components)
-│   ├── projects/           # project list, tasks, responses, flags routes
-│   └── _components/        # shared UI: EntityPage, ItemList, buttons, forms
-├── lib/                    # hooks (useItems, useResponse, useFlags) + types
-└── styles/
-src-tauri/                  # Rust backend: commands, DB access, schema
-```
-
 ## Status / known limitations
 
 - [x] Projects & tasks CRUD
@@ -95,3 +81,5 @@ src-tauri/                  # Rust backend: commands, DB access, schema
       into per-entity commands
 - [ ] Sentence highlighting relies on exact text match; storing sentence
       indices at flag-creation time would make it exact
+
+NOTE: This is a Work In Progress currently; expect a dev environment.
