@@ -18,15 +18,19 @@ export default function FlagWorkspace({ taskId, responses }: FlagWorkspaceProps)
   const [active, setActive] = useState<"A" | "B">("A");
   const [selectedFlagId, setSelectedFlagId] = useState<number | null>(null);
 
-  const { flags, remove } = useFlags(taskId);
-
-  console.log(responses);
+  const switchResponse = (label: "A" | "B") => {
+    setActive(label);
+    setSelectedFlagId(null);
+  };
 
   const activeResponse = active === "A" ? responses.a : responses.b;
-  // Flags belong to a specific response — only show the active one's flags
-  const activeFlags = flags?.filter((f) => f.responseId === activeResponse?.id) ?? [];
 
   if (!activeResponse) return null;
+
+  const { flags, remove } = useFlags(activeResponse.id);
+
+  // Flags belong to a specific response — only show the active one's flags
+  const activeFlags = flags?.filter((f) => f.responseId === activeResponse?.id) ?? [];
 
   return (
     <div className="flex h-screen flex-col bg-neutral-900 text-neutral-100">
@@ -56,7 +60,7 @@ export default function FlagWorkspace({ taskId, responses }: FlagWorkspaceProps)
           {(["A", "B"] as const).map((label) => (
             <button
               key={label}
-              onClick={() => setActive(label)}
+              onClick={() => switchResponse(label)}
               className={`mr-3 transition ${
                 active === label ? "text-white underline decoration-blue-500 decoration-2 underline-offset-4" : "text-gray-500 hover:text-gray-300"
               }`}
@@ -107,9 +111,9 @@ export default function FlagWorkspace({ taskId, responses }: FlagWorkspaceProps)
       <div className="mx-auto w-full max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
         <div className="flex justify-end">
           {active === "A" ? (
-            <NewButton buttonText="Next: Response B →" onClick={() => setActive("B")} />
+            <NewButton buttonText="Next: Response B →" onClick={() => switchResponse("B")} />
           ) : (
-            <NewButton buttonText="← Back to Response A" onClick={() => setActive("A")} />
+            <NewButton buttonText="← Back to Response A" onClick={() => switchResponse("A")} />
           )}
         </div>
       </div>
