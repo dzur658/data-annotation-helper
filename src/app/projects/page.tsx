@@ -8,6 +8,8 @@ import { useItems } from "../../lib/use-entity-items";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
+import LoadingShell from "../_components/loading-shell";
+
 type ModelStatus = "loading" | "ready" | "error";
 
 export default function ProjectsPage() {
@@ -29,10 +31,7 @@ export default function ProjectsPage() {
   useEffect(ensure, []);
 
   if (status === "loading") return (
-    <div>
-      <div className="w-6 h-6 border-2 border-slate-600 border-t-blue-400 rounded-full animate-spin"></div>
-      <p className="text-slate-400">Downloading or loading decision model (first run downloads 1.5 GB)</p>
-    </div>
+    <LoadingShell message="Loading Decision Model" detail="Downloading or loading decision model (first run downloads 1.5 GB)" />
   );
   if (status === "error")
     return (
