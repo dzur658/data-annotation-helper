@@ -22,7 +22,7 @@ export default function FlagCard({ flag, selected, onSelect, onDelete }: FlagCar
           : "border-gray-700 bg-neutral-800/50 hover:border-gray-600 hover:bg-neutral-800"
       }`}
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex pt-2 items-center justify-between gap-2">
         <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-xs font-medium text-blue-400">
           {flag.flagType}
         </span>
@@ -46,7 +46,7 @@ export default function FlagCard({ flag, selected, onSelect, onDelete }: FlagCar
             onDelete(flag.id);
           }}
           aria-label={`Delete flag ${flag.id}`}
-          className="absolute right-2 top-2 rounded p-1 text-gray-600 opacity-0 transition hover:text-red-400 focus:opacity-100 group-hover:opacity-100"
+          className="absolute mb-2 right-0 top-0 rounded p-1 text-gray-600 opacity-0 transition hover:text-red-400 focus:opacity-100 group-hover:opacity-100"
         >
           {/* small × — swap for TrashIcon if you export it from itemListing */}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
