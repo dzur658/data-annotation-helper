@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 import type { ResponsePair, Response, Kind } from "./types";
 
-export function useResponse(parentId: number, responseLabel?: string, responseText?: string) {
+export function useResponse(parentId: number) {
   const [responses, setResponses] = useState<ResponsePair | null>(null);
 
   const kind: Kind = "response";

@@ -9,11 +9,10 @@ import { useFlags } from "~/lib/use-flags";
 import type { ResponsePair } from "~/lib/types";
 
 interface FlagWorkspaceProps {
-  taskId: number;
   responses: ResponsePair; // the A/B pair from useResponse
 }
 
-export default function FlagWorkspace({ taskId, responses }: FlagWorkspaceProps) {
+export default function FlagWorkspace({ responses }: FlagWorkspaceProps) {
   const [view, setView] = useState<"text" | "grid">("text");
   const [active, setActive] = useState<"A" | "B">("A");
   const [selectedFlagId, setSelectedFlagId] = useState<number | null>(null);
@@ -24,10 +23,11 @@ export default function FlagWorkspace({ taskId, responses }: FlagWorkspaceProps)
   };
 
   const activeResponse = active === "A" ? responses.a : responses.b;
+  const responseId = activeResponse?.id ?? 0;
+
+  const { flags, remove } = useFlags(responseId);
 
   if (!activeResponse) return null;
-
-  const { flags, remove } = useFlags(activeResponse.id);
 
   // Flags belong to a specific response — only show the active one's flags
   const activeFlags = flags?.filter((f) => f.responseId === activeResponse?.id) ?? [];

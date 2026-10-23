@@ -1,4 +1,6 @@
-interface NewButtonProps {
+import type { ButtonHTMLAttributes } from "react";
+
+interface NewButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   buttonText?: string;
   onClick?: () => void;
   disabled?: boolean;

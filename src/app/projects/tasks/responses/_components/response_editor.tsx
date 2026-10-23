@@ -51,7 +51,12 @@ export default function ResponseEditor({ taskId, onCompleted }: ResponseEditorPr
       await invoke("add_response_pair_and_generate", {
         ...payload,
       });
-    } finally {
+    } 
+    catch (e) {
+      console.error("Error during response submission:", e);
+      setError(String(e));
+    }
+    finally {
       setChecking(false);
 
       onCompleted();

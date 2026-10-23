@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.dzur658.data-annotation-helper",
   "build": {
-    "frontendDist": "../../out",
+    "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build"

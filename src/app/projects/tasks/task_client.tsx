@@ -1,0 +1,27 @@
+"use client";
+
+import { useSearchParams, useRouter } from "next/navigation";
+import EntityPage from "../../_components/entity-page";
+import { useItems } from "../../../lib/use-entity-items";
+import { Suspense } from "react";
+
+export default function TasksClient() {
+  const router = useRouter();
+
+  const projectId = Number(useSearchParams().get("projectId"));
+
+  const { items, create, remove } = useItems("task", projectId);
+
+  return (
+    <Suspense>
+      <EntityPage
+        title="Tasks"
+        itemName="Task"
+        items={items}
+        onCreate={create}
+        onDelete={remove}
+        onSelect={(id) => router.push(`/projects/tasks/responses?projectId=${projectId}&taskId=${id}`)}
+      />
+    </Suspense>
+  );
+}
